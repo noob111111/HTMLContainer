@@ -1,0 +1,19 @@
+name: HTMLContainer
+options:
+  bundleIdPrefix: com.example
+configs:
+  Debug: debug
+  Release: release
+settings:
+  IPHONEOS_DEPLOYMENT_TARGET: '15.0'
+targets:
+  HTMLContainer:
+    type: application
+    platform: iOS
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.example.HTMLContainer
+      INFO_PLIST_FILE: Info.plist
+    sources:
+      - path: Sources/HTMLContainerApp
+    resources:
+      - Resources/HTMLs
