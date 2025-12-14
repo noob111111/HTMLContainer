@@ -44,4 +44,22 @@ final class FileHelper: ObservableObject {
         }
         refresh()
     }
+
+    func importFolder(at url: URL) throws {
+        let fm = FileManager.default
+        let destFolder = htmlsFolderURL.appendingPathComponent(url.lastPathComponent)
+        var target = destFolder
+        // avoid clobbering existing folder; if exists, append a number
+        var i = 1
+        while fm.fileExists(atPath: target.path) {
+            target = htmlsFolderURL.appendingPathComponent("\(url.lastPathComponent)-\(i)")
+            i += 1
+        }
+
+        let useSecurity = url.startAccessingSecurityScopedResource()
+        defer { if useSecurity { url.stopAccessingSecurityScopedResource() } }
+
+        try fm.copyItem(at: url, to: target)
+        refresh()
+    }
 }
