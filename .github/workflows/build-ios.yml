@@ -1,0 +1,27 @@
+name: Build iOS unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure script is executable
+        run: chmod +x scripts/build-ios.sh
+
+      - name: Run build script (verbose)
+        run: scripts/build-ios.sh
+
+      - name: Upload artifacts (IPA and logs)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            HTMLContainer.ipa
+            build.log
