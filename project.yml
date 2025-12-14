@@ -12,7 +12,7 @@ targets:
     platform: iOS
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.HTMLContainer
-      INFO_PLIST_FILE: Resources/Info.plist
+      INFOPLIST_FILE: Resources/Info.plist
     sources:
       - path: Sources/HTMLContainerApp
     resources:
