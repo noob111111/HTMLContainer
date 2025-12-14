@@ -6,7 +6,10 @@ final class FileHelper: ObservableObject {
     private let htmlsFolderName = "HTMLs"
 
     init() {
-        refresh()
+        // perform setup off the main thread to avoid blocking app launch
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.prepareSampleIfNeeded()
+        }
     }
 
     var htmlsFolderURL: URL {
@@ -20,28 +23,47 @@ final class FileHelper: ObservableObject {
     }
 
     func refresh() {
-        let fm = FileManager.default
-        var found: [URL] = []
-        if let enumerator = fm.enumerator(at: htmlsFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles, .skipsPackageDescendants]) {
-            for case let fileURL as URL in enumerator {
-                if fileURL.pathExtension.lowercased() == "html" {
-                    found.append(fileURL)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let fm = FileManager.default
+            var found: [URL] = []
+            if let enumerator = fm.enumerator(at: self.htmlsFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles, .skipsPackageDescendants]) {
+                for case let fileURL as URL in enumerator {
+                    if fileURL.pathExtension.lowercased() == "html" {
+                        found.append(fileURL)
+                    }
                 }
             }
+            let sorted = found.sorted { $0.lastPathComponent < $1.lastPathComponent }
+            DispatchQueue.main.async {
+                self.htmlFiles = sorted
+            }
         }
-        htmlFiles = found.sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
     func prepareSampleIfNeeded() {
         let fm = FileManager.default
         let sampleDir = htmlsFolderURL.appendingPathComponent("Sample")
+        var created = false
         if !fm.fileExists(atPath: sampleDir.path) {
             try? fm.createDirectory(at: sampleDir, withIntermediateDirectories: true)
-            if let bundleSample = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "HTMLs/Sample") {
-                let dest = sampleDir.appendingPathComponent("index.html")
-                try? fm.copyItem(at: bundleSample, to: dest)
-            }
+            created = true
         }
+
+        // Copy bundled sample files (index.html and style.css) into Sample folder
+        if created {
+            if let indexURL = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "HTMLs/Sample") {
+                let dest = sampleDir.appendingPathComponent("index.html")
+                try? fm.copyItem(at: indexURL, to: dest)
+            }
+            if let cssURL = Bundle.main.url(forResource: "style", withExtension: "css", subdirectory: "HTMLs/Sample") {
+                let dest2 = sampleDir.appendingPathComponent("style.css")
+                try? fm.copyItem(at: cssURL, to: dest2)
+            }
+            // create an initial webview.log and app.log entry
+            Logger.append("Prepared bundled Sample")
+            Logger.append("Prepared bundled Sample", to: "webview.log")
+        }
+
         refresh()
     }
 
