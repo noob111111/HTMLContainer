@@ -21,8 +21,15 @@ final class FileHelper: ObservableObject {
 
     func refresh() {
         let fm = FileManager.default
-        let urls = (try? fm.contentsOfDirectory(at: htmlsFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
-        htmlFiles = urls.filter { $0.pathExtension.lowercased() == "html" }
+        var found: [URL] = []
+        if let enumerator = fm.enumerator(at: htmlsFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles, .skipsPackageDescendants]) {
+            for case let fileURL as URL in enumerator {
+                if fileURL.pathExtension.lowercased() == "html" {
+                    found.append(fileURL)
+                }
+            }
+        }
+        htmlFiles = found.sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
     func prepareSampleIfNeeded() {
