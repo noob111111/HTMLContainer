@@ -12,10 +12,12 @@ struct ContentView: View {
     var body: some View {
         TabView {
             NavigationView {
-                HTMLListView(files: fileHelper.htmlFiles) { url in
+                HTMLListView(files: fileHelper.htmlFiles, onOpen: { url in
                     selectedURL = url
                     isPresenting = true
-                }
+                }, onRefresh: {
+                    fileHelper.refresh()
+                })
                 .navigationTitle("HTMLContainer")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {

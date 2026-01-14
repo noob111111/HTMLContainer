@@ -3,6 +3,7 @@ import SwiftUI
 struct HTMLListView: View {
     var files: [URL]
     var onOpen: (URL) -> Void
+    var onRefresh: () -> Void
     @State private var selectedFolder: URL?
     @State private var showFilePicker = false
     @State private var showNoHTMLAlert = false
@@ -34,6 +35,7 @@ struct HTMLListView: View {
                     }
                     Button("Delete", role: .destructive) {
                         try? FileManager.default.removeItem(at: url)
+                        onRefresh()
                     }
                 }
             }
@@ -119,53 +121,54 @@ struct FilePickerSheet: View {
     var onSelect: (URL) -> Void
     @State private var htmlFiles: [URL] = []
     @State private var selectedFile: URL?
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        NavigationView {
-            VStack {
-                if htmlFiles.isEmpty {
-                    Text("No HTML files found in this folder")
-                        .foregroundColor(.gray)
-                        .padding()
-                } else {
-                    List {
-                        ForEach(htmlFiles, id: \.self) { file in
-                            Button(action: {
-                                SettingsStore.setPreferredFile(file.lastPathComponent, forFolder: folder.path)
-                                onSelect(file)
-                            }) {
-                                HStack {
-                                    Image(systemName: "doc.text.fill")
-                                        .foregroundColor(.blue)
-                                    VStack(alignment: .leading) {
-                                        Text(file.lastPathComponent)
-                                            .foregroundColor(.primary)
-                                        if selectedFile == file {
-                                            Text("(Previously selected)")
-                                                .font(.caption)
-                                                .foregroundColor(.green)
-                                        }
-                                    }
-                                    Spacer()
-                                    if selectedFile == file {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                    }
+        VStack(spacing: 20) {
+            Text("Choose HTML File")
+                .font(.title2)
+                .bold()
+            if htmlFiles.isEmpty {
+                Text("No HTML files found in this folder")
+                    .foregroundColor(.gray)
+                Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .padding(.top)
+            } else {
+                List(htmlFiles, id: \.self) { file in
+                    Button(action: {
+                        SettingsStore.setPreferredFile(file.lastPathComponent, forFolder: folder.path)
+                        onSelect(file)
+                    }) {
+                        HStack {
+                            Image(systemName: "doc.text.fill")
+                                .foregroundColor(.blue)
+                            VStack(alignment: .leading) {
+                                Text(file.lastPathComponent)
+                                    .foregroundColor(.primary)
+                                if selectedFile == file {
+                                    Text("(Previously selected)")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
                                 }
+                            }
+                            Spacer()
+                            if selectedFile == file {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
                             }
                         }
                     }
                 }
+                .listStyle(.plain)
+                Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .padding(.top)
             }
-            .navigationTitle("Choose HTML File")
-            .navigationBarTitleDisplayMode(.inline)
         }
-        .onAppear {
-            loadHTMLFiles()
-        }
-    }
-
-    private func loadHTMLFiles() {
+        .padding()
         let fm = FileManager.default
         let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
         htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
@@ -179,7 +182,7 @@ struct FilePickerSheet: View {
 
 struct HTMLListView_Previews: PreviewProvider {
     static var previews: some View {
-        HTMLListView(files: []) { _ in }
+        HTMLListView(files: [], onOpen: { _ in }, onRefresh: {})
     }
 }
 
