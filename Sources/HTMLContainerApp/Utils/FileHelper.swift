@@ -22,7 +22,12 @@ final class FileHelper: ObservableObject {
     func refresh() {
         let fm = FileManager.default
         let urls = (try? fm.contentsOfDirectory(at: htmlsFolderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
-        htmlFiles = urls.filter { $0.pathExtension.lowercased() == "html" }
+        // Show folders and HTML files
+        htmlFiles = urls.filter { url in
+            var isDir: ObjCBool = false
+            fm.fileExists(atPath: url.path, isDirectory: &isDir)
+            return isDir.boolValue || url.pathExtension.lowercased() == "html"
+        }.sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
     func prepareSampleIfNeeded() {
@@ -35,6 +40,24 @@ final class FileHelper: ObservableObject {
                 try? fm.copyItem(at: bundleSample, to: dest)
             }
         }
+        refresh()
+    }
+
+    func importFolder(at url: URL) throws {
+        let fm = FileManager.default
+        let destFolder = htmlsFolderURL.appendingPathComponent(url.lastPathComponent)
+        var target = destFolder
+        // avoid clobbering existing folder; if exists, append a number
+        var i = 1
+        while fm.fileExists(atPath: target.path) {
+            target = htmlsFolderURL.appendingPathComponent("\(url.lastPathComponent)-\(i)")
+            i += 1
+        }
+
+        let useSecurity = url.startAccessingSecurityScopedResource()
+        defer { if useSecurity { url.stopAccessingSecurityScopedResource() } }
+
+        try fm.copyItem(at: url, to: target)
         refresh()
     }
 }

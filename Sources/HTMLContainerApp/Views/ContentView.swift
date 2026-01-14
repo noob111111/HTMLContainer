@@ -4,6 +4,9 @@ struct ContentView: View {
     @StateObject private var fileHelper = FileHelper()
     @State private var selectedURL: URL?
     @State private var isPresenting = false
+    @State private var showFolderPicker = false
+    @State private var importError: String?
+    @State private var showError = false
 
     var body: some View {
         NavigationView {
@@ -12,6 +15,28 @@ struct ContentView: View {
                 isPresenting = true
             }
             .navigationTitle("HTMLContainer")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showFolderPicker = true }) {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showFolderPicker) {
+            FolderPickerView { url in
+                do {
+                    try fileHelper.importFolder(at: url)
+                } catch {
+                    importError = error.localizedDescription
+                    showError = true
+                }
+            }
+        }
+        .alert("Import Error", isPresented: $showError) {
+            Button("OK") { showError = false }
+        } message: {
+            Text(importError ?? "Unknown error")
         }
         .fullScreenCover(isPresented: $isPresenting) {
             if let url = selectedURL {
@@ -33,3 +58,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+

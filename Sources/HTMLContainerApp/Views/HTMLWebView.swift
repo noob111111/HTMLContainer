@@ -26,11 +26,28 @@ struct HTMLWebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
 
-        webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        // Determine what to load: if url is a folder, load index.html from inside; otherwise load the file directly
+        let fileToLoad = resolveFileToLoad(url)
+        let accessURL = fileToLoad.deletingLastPathComponent()
+        webView.loadFileURL(fileToLoad, allowingReadAccessTo: accessURL)
         return webView
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    private func resolveFileToLoad(_ url: URL) -> URL {
+        var isDir: ObjCBool = false
+        let fm = FileManager.default
+        if fm.fileExists(atPath: url.path, isDirectory: &isDir), isDir.boolValue {
+            // It's a folder; look for index.html
+            let indexURL = url.appendingPathComponent("index.html")
+            if fm.fileExists(atPath: indexURL.path) {
+                return indexURL
+            }
+        }
+        // It's a file or index.html not found; return as-is
+        return url
+    }
 
     class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         var onExit: () -> Void

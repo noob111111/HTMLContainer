@@ -8,6 +8,8 @@ struct HTMLListView: View {
         List {
             ForEach(files, id: \.self) { url in
                 HStack {
+                    Image(systemName: isFolder(url) ? "folder.fill" : "doc.text.fill")
+                        .foregroundColor(.blue)
                     Text(url.lastPathComponent)
                     Spacer()
                 }
@@ -23,6 +25,12 @@ struct HTMLListView: View {
                 }
             }
         }
+    }
+
+    private func isFolder(_ url: URL) -> Bool {
+        var isDir: ObjCBool = false
+        FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+        return isDir.boolValue
     }
 }
 
