@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var showFolderPicker = false
     @State private var importError: String?
     @State private var showError = false
+    @State private var isImporting = false
 
     var body: some View {
         NavigationView {
@@ -17,19 +18,39 @@ struct ContentView: View {
             .navigationTitle("HTMLContainer")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showFolderPicker = true }) {
-                        Image(systemName: "plus")
+                    if isImporting {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Importing...")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.gray)
+                        .disabled(true)
+                    } else {
+                        Button(action: { showFolderPicker = true }) {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
             }
         }
         .sheet(isPresented: $showFolderPicker) {
             FolderPickerView { url in
-                do {
-                    try fileHelper.importFolder(at: url)
-                } catch {
-                    importError = error.localizedDescription
-                    showError = true
+                isImporting = true
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        try fileHelper.importFolder(at: url)
+                        DispatchQueue.main.async {
+                            isImporting = false
+                        }
+                    } catch {
+                        DispatchQueue.main.async {
+                            importError = error.localizedDescription
+                            showError = true
+                            isImporting = false
+                        }
+                    }
                 }
             }
         }

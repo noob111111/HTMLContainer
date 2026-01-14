@@ -26,10 +26,20 @@ struct HTMLWebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
 
+    private func getBaseURL(_ fileURL: URL) -> URL {
+        var isDir: ObjCBool = false
+        let fm = FileManager.default
+        // Get the directory containing the file, or the file itself if it's a folder
+        if fm.fileExists(atPath: fileURL.path, isDirectory: &isDir), isDir.boolValue {
+            return fileURL
+        }
+        return fileURL.deletingLastPathComponent()
+    }
+
         // Determine what to load: if url is a folder, load index.html from inside; otherwise load the file directly
         let fileToLoad = resolveFileToLoad(url)
-        let accessURL = fileToLoad.deletingLastPathComponent()
-        webView.loadFileURL(fileToLoad, allowingReadAccessTo: accessURL)
+        let baseURL = getBaseURL(fileToLoad)
+        webView.loadFileURL(fileToLoad, allowingReadAccessTo: baseURL)
         return webView
     }
 
