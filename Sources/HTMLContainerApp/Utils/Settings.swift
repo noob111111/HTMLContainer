@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum AutoOpenSetting: Int, CaseIterable, Identifiable {
     case auto = 0

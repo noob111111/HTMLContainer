@@ -31,3 +31,13 @@ jobs:
         with:
           name: htmlcontainer-ipa
           path: HTMLContainer.ipa
+
+      - name: Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          files: HTMLContainer.ipa
+          tag_name: build-${{ github.run_number }}
+          name: Build ${{ github.run_number }}
+          draft: false
+          prerelease: true
