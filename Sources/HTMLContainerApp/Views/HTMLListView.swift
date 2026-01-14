@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct HTMLListView: View {
     var files: [URL]
@@ -32,6 +33,10 @@ struct HTMLListView: View {
                         } else {
                             onOpen(url)
                         }
+                    }
+                    Button("Open in Folder") {
+                        let folderURL = isFolder(url) ? url : url.deletingLastPathComponent()
+                        UIApplication.shared.open(folderURL)
                     }
                     Button("Delete", role: .destructive) {
                         try? FileManager.default.removeItem(at: url)

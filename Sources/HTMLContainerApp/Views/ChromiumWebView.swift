@@ -55,6 +55,25 @@ struct ChromiumWebView: UIViewRepresentable {
         let baseURL = getBaseURL(fileToLoad)
         print("Loading file: \(fileToLoad), baseURL: \(baseURL)")
         webView.loadFileURL(fileToLoad, allowingReadAccessTo: baseURL)
+        
+        // Temporary debug: wait 20 seconds, write log, then exit
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
+            let logURL = url.deletingLastPathComponent().appendingPathComponent("debug.log")
+            let logContent = """
+            Loaded file: \(url.path)
+            Resolved file: \(fileToLoad.path)
+            Base URL: \(baseURL.path)
+            Timestamp: \(Date())
+            """
+            do {
+                try logContent.write(to: logURL, atomically: true, encoding: .utf8)
+                print("Wrote debug log to: \(logURL.path)")
+            } catch {
+                print("Failed to write debug log: \(error)")
+            }
+            context.coordinator.onExit()
+        }
+        
         return webView
     }
 
