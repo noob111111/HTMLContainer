@@ -34,10 +34,11 @@ jobs:
 
       - name: Release
         if: success()
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: HTMLContainer.ipa
-          tag_name: build-${{ github.run_number }}
-          name: Build ${{ github.run_number }}
+          tag_name: build-${{ github.run_id }}
+          name: Build ${{ github.run_id }}
           draft: false
           prerelease: true
