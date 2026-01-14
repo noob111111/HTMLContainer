@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("htmlSelectionSetting") private var htmlSelectionSettingRaw: Int = AutoOpenSetting.auto.rawValue
+    @AppStorage("closeButtonPosition") private var closeButtonPositionRaw: Int = CloseButtonPosition.topRight.rawValue
 
     var body: some View {
         NavigationView {
@@ -10,6 +11,15 @@ struct SettingsView: View {
                     Picker("When opening a folder", selection: $htmlSelectionSettingRaw) {
                         ForEach(AutoOpenSetting.allCases) { s in
                             Text(s.description).tag(s.rawValue)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                }
+
+                Section(header: Text("Close button position")) {
+                    Picker("Position", selection: $closeButtonPositionRaw) {
+                        ForEach(CloseButtonPosition.allCases) { p in
+                            Text(p.description).tag(p.rawValue)
                         }
                     }
                     .pickerStyle(.inline)

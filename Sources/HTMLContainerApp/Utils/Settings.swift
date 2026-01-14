@@ -16,6 +16,33 @@ enum AutoOpenSetting: Int, CaseIterable, Identifiable {
     }
 }
 
+enum CloseButtonPosition: Int, CaseIterable, Identifiable {
+    case topLeft = 0
+    case topRight = 1
+    case bottomLeft = 2
+    case bottomRight = 3
+
+    var id: Int { rawValue }
+
+    var description: String {
+        switch self {
+        case .topLeft: return "Top Left"
+        case .topRight: return "Top Right"
+        case .bottomLeft: return "Bottom Left"
+        case .bottomRight: return "Bottom Right"
+        }
+    }
+
+    var alignment: Alignment {
+        switch self {
+        case .topLeft: return .topLeading
+        case .topRight: return .topTrailing
+        case .bottomLeft: return .bottomLeading
+        case .bottomRight: return .bottomTrailing
+        }
+    }
+}
+
 struct SettingsStore {
     private static let askedKey = "askedFolders"
     private static let filePrefsKey = "filePreferences"

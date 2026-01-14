@@ -90,9 +90,11 @@ struct ContentView: View {
 struct WebViewScreen: View {
     let url: URL
     let onExit: () -> Void
-    
+    @AppStorage("closeButtonPosition") private var closeButtonPositionRaw: Int = CloseButtonPosition.topRight.rawValue
+
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        let position = CloseButtonPosition(rawValue: closeButtonPositionRaw) ?? .topRight
+        ZStack(alignment: position.alignment) {
             ChromiumWebView(url: url, onExit: onExit)
             Button(action: onExit) {
                 Image(systemName: "xmark.circle.fill")
