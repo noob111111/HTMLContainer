@@ -26,16 +26,6 @@ struct HTMLWebView: UIViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
 
-    private func getBaseURL(_ fileURL: URL) -> URL {
-        var isDir: ObjCBool = false
-        let fm = FileManager.default
-        // Get the directory containing the file, or the file itself if it's a folder
-        if fm.fileExists(atPath: fileURL.path, isDirectory: &isDir), isDir.boolValue {
-            return fileURL
-        }
-        return fileURL.deletingLastPathComponent()
-    }
-
         // Determine what to load: if url is a folder, load index.html from inside; otherwise load the file directly
         let fileToLoad = resolveFileToLoad(url)
         let baseURL = getBaseURL(fileToLoad)
@@ -57,6 +47,16 @@ struct HTMLWebView: UIViewRepresentable {
         }
         // It's a file or index.html not found; return as-is
         return url
+    }
+
+    private func getBaseURL(_ fileURL: URL) -> URL {
+        var isDir: ObjCBool = false
+        let fm = FileManager.default
+        // Get the directory containing the file, or the file itself if it's a folder
+        if fm.fileExists(atPath: fileURL.path, isDirectory: &isDir), isDir.boolValue {
+            return fileURL
+        }
+        return fileURL.deletingLastPathComponent()
     }
 
     class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
