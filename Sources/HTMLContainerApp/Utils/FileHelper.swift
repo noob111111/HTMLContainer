@@ -43,7 +43,7 @@ final class FileHelper: ObservableObject {
         refresh()
     }
 
-    func importFolder(at url: URL) throws {
+    func importFolder(at url: URL) throws -> URL {
         let fm = FileManager.default
         let destFolder = htmlsFolderURL.appendingPathComponent(url.lastPathComponent)
         var target = destFolder
@@ -59,5 +59,6 @@ final class FileHelper: ObservableObject {
 
         try fm.copyItem(at: url, to: target)
         refresh()
+        return target
     }
 }
