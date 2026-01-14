@@ -8,7 +8,6 @@ struct ContentView: View {
     @State private var importError: String?
     @State private var showError = false
     @State private var isImporting = false
-    @AppStorage("autoOpenSetting") private var autoOpenSettingRaw: Int = AutoOpenSetting.always.rawValue
 
     var body: some View {
         TabView {

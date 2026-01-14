@@ -5,6 +5,7 @@ struct HTMLListView: View {
     var onOpen: (URL) -> Void
     @State private var selectedFolder: URL?
     @State private var showFilePicker = false
+    @State private var showNoHTMLAlert = false
 
     var body: some View {
         List {
@@ -18,8 +19,7 @@ struct HTMLListView: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     if isFolder(url) {
-                        selectedFolder = url
-                        showFilePicker = true
+                        handleFolderTap(url)
                     } else {
                         onOpen(url)
                     }
@@ -27,8 +27,7 @@ struct HTMLListView: View {
                 .contextMenu {
                     Button("Open") {
                         if isFolder(url) {
-                            selectedFolder = url
-                            showFilePicker = true
+                            handleFolderTap(url)
                         } else {
                             onOpen(url)
                         }
@@ -48,12 +47,69 @@ struct HTMLListView: View {
                 .modifier(SheetModifier())
             }
         }
+        .alert("No HTML Files Found", isPresented: $showNoHTMLAlert) {
+            Button("OK") { showNoHTMLAlert = false }
+        } message: {
+            Text("This folder doesn't contain any HTML files.")
+        }
     }
 
     private func isFolder(_ url: URL) -> Bool {
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
         return isDir.boolValue
+    }
+
+    private func handleFolderTap(_ folderURL: URL) {
+        let fm = FileManager.default
+        let all = (try? fm.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        let htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+
+        // Check if index.html exists
+        let indexURL = folderURL.appendingPathComponent("index.html")
+        let hasIndex = fm.fileExists(atPath: indexURL.path)
+
+        // Get current setting (assuming we add it to Settings)
+        let setting = AutoOpenSetting(rawValue: UserDefaults.standard.integer(forKey: "htmlSelectionSetting")) ?? .auto
+
+        switch setting {
+        case .auto:
+            if hasIndex {
+                onOpen(indexURL)
+            } else if !htmlFiles.isEmpty {
+                // Auto-pick first HTML file
+                onOpen(htmlFiles[0])
+            } else {
+                // No HTML files, show alert
+                showNoHTMLAlert = true
+            }
+        case .askFirstTime:
+            let key = folderURL.path
+            if SettingsStore.hasAsked(forFolderPath: key) {
+                if hasIndex {
+                    onOpen(indexURL)
+                } else if !htmlFiles.isEmpty {
+                    onOpen(htmlFiles[0])
+                } else {
+                    showNoHTMLAlert = true
+                }
+            } else {
+                SettingsStore.markAsked(forFolderPath: key)
+                if !htmlFiles.isEmpty {
+                    selectedFolder = folderURL
+                    showFilePicker = true
+                } else {
+                    showNoHTMLAlert = true
+                }
+            }
+        case .alwaysAsk:
+            if !htmlFiles.isEmpty {
+                selectedFolder = folderURL
+                showFilePicker = true
+            } else {
+                showNoHTMLAlert = true
+            }
+        }
     }
 }
 

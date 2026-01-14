@@ -1,17 +1,17 @@
 import Foundation
 
 enum AutoOpenSetting: Int, CaseIterable, Identifiable {
-    case always = 0
-    case askEveryTime = 1
-    case askFirstTime = 2
+    case auto = 0
+    case askFirstTime = 1
+    case alwaysAsk = 2
 
     var id: Int { rawValue }
 
     var description: String {
         switch self {
-        case .always: return "Always open imported folder automatically"
-        case .askEveryTime: return "Ask every time whether to open after import"
-        case .askFirstTime: return "Ask only the first time a folder is added"
+        case .auto: return "Automatically open HTML (index.html or first file)"
+        case .askFirstTime: return "Ask which HTML to open on first tap"
+        case .alwaysAsk: return "Always ask which HTML to open"
         }
     }
 }
