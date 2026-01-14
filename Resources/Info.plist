@@ -29,6 +29,8 @@
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
+      <key>CFBundleURLName</key>
+      <string>com.example.HTMLContainer</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>htmlcontainer</string>
