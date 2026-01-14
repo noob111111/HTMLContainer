@@ -1,28 +1,23 @@
 import Foundation
 
-/// Instructions to integrate Chromium for iOS sideloading:
-/// 
-/// Option 1: Use a prebuilt Chromium framework
-/// - Download chromium-ios arm64 binary from: https://github.com/GoogleChromeLabs/chromium-ios-builds
-/// - Extract the framework: Chromium.framework
-/// - Add to Xcode: Targets > HTMLContainer > Build Phases > Link Binary With Libraries
-/// - Add framework search path: $(PROJECT_DIR)/Frameworks
+/// Chromium Integration for iOS (Optional)
 ///
-/// Option 2: Build Chromium from source (requires significant setup)
-/// - Clone https://github.com/chromium/chromium (iOS branch)
-/// - Build with: gn gen out/ios && ninja -C out/ios
-/// - Extract the resulting Chromium.framework
+/// The app works out-of-the-box with WKWebView. Chromium integration is OPTIONAL for enhanced features.
+/// Since true Chromium binaries are very large (300+MB), they are not bundled by default.
 ///
-/// Option 3: Use CEF (Chromium Embedded Framework)
-/// - Download CEF iOS build from: https://bitbucket.org/chromiumembedded/cef/wiki/BranchesAndBuilding
-/// - Link CEF libraries instead of Chromium.framework
+/// To add Chromium support to a custom build:
+/// 1. Download Chromium.framework (see CHROMIUM.md)
+/// 2. Add to project: Targets > Build Settings > Framework Search Paths: $(PROJECT_DIR)/Frameworks
+/// 3. Link: Other Linker Flags: -framework Chromium
+/// 4. Define: SWIFT_DEFINES: CHROMIUM_AVAILABLE=1
+/// 5. Uncomment import in ChromiumWebView.swift
 ///
-/// Once integrated, uncomment the import below and use ChromiumWebEngine
+/// For the standard IPA distribution, WKWebView with Chrome user-agent is sufficient.
 
-// Uncomment when Chromium framework is available:
+// Uncomment when Chromium framework is linked:
 // import Chromium
 
-/// Flag to detect if Chromium is available
+/// Flag to detect if Chromium is available (only true if manually integrated)
 let chromiumAvailable: Bool = {
     #if CHROMIUM_AVAILABLE
     return true
@@ -30,3 +25,4 @@ let chromiumAvailable: Bool = {
     return false
     #endif
 }()
+

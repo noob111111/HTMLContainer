@@ -45,8 +45,7 @@ struct HTMLListView: View {
                     onOpen(file)
                     showFilePicker = false
                 })
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+                .modifier(SheetModifier())
             }
         }
     }
@@ -125,5 +124,18 @@ struct FilePickerSheet: View {
 struct HTMLListView_Previews: PreviewProvider {
     static var previews: some View {
         HTMLListView(files: []) { _ in }
+    }
+}
+
+// Modifier for iOS 16+ sheet presentation features
+struct SheetModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 16.0, *) {
+            content
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        } else {
+            content
+        }
     }
 }
