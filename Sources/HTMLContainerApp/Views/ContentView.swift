@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import Foundation
 
 struct ContentView: View {
@@ -56,6 +57,19 @@ struct ContentView: View {
                     let logURL = fileHelper.htmlsFolderURL.appendingPathComponent("app_started.log")
                     let logContent = "App started\nTimestamp: \(Date())"
                     try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
+                    
+                    // Check pasteboard for shortcut command
+                    if let pasteboardString = UIPasteboard.general.string, pasteboardString.hasPrefix("htmlcontainer:open:") {
+                        let fileName = String(pasteboardString.dropFirst("htmlcontainer:open:".count))
+                        // Find and open the file
+                        let htmlFiles = fileHelper.htmlFiles.filter { $0.lastPathComponent == fileName }
+                        if let fileURL = htmlFiles.first {
+                            selectedURL = fileURL
+                            isPresenting = true
+                        }
+                        // Clear the pasteboard
+                        UIPasteboard.general.string = ""
+                    }
                 }
                 .sheet(isPresented: $showFolderPicker) {
                     FolderPickerView { url in
