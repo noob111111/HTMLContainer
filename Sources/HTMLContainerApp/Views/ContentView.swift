@@ -9,8 +9,6 @@ struct ContentView: View {
     @State private var showError = false
     @State private var isImporting = false
     @AppStorage("autoOpenSetting") private var autoOpenSettingRaw: Int = AutoOpenSetting.always.rawValue
-    @State private var pendingImportedURL: URL?
-    @State private var showOpenPrompt = false
 
     var body: some View {
         TabView {
@@ -49,28 +47,11 @@ struct ContentView: View {
                 isImporting = true
                 DispatchQueue.global(qos: .userInitiated).async {
                     do {
-                        let imported = try fileHelper.importFolder(at: url)
+                        let _ = try fileHelper.importFolder(at: url)
                         DispatchQueue.main.async {
                             isImporting = false
-                            let setting = AutoOpenSetting(rawValue: autoOpenSettingRaw) ?? .always
-                            switch setting {
-                            case .always:
-                                selectedURL = imported
-                                isPresenting = true
-                            case .askEveryTime:
-                                pendingImportedURL = imported
-                                showOpenPrompt = true
-                            case .askFirstTime:
-                                let key = imported.path
-                                if SettingsStore.hasAsked(forFolderPath: key) {
-                                    selectedURL = imported
-                                    isPresenting = true
-                                } else {
-                                    SettingsStore.markAsked(forFolderPath: key)
-                                    pendingImportedURL = imported
-                                    showOpenPrompt = true
-                                }
-                            }
+                            showFolderPicker = false
+                            // Just import and close; don't auto-open
                         }
                     } catch {
                         DispatchQueue.main.async {
@@ -86,20 +67,6 @@ struct ContentView: View {
             Button("OK") { showError = false }
         } message: {
             Text(importError ?? "Unknown error")
-        }
-        .alert("Open Imported Folder?", isPresented: $showOpenPrompt) {
-            Button("Open") {
-                if let url = pendingImportedURL {
-                    selectedURL = url
-                    isPresenting = true
-                }
-                pendingImportedURL = nil
-            }
-            Button("Later", role: .cancel) {
-                pendingImportedURL = nil
-            }
-        } message: {
-            Text("Would you like to open the HTML content you just imported?")
         }
         .fullScreenCover(isPresented: $isPresenting) {
             if let url = selectedURL {

@@ -45,6 +45,8 @@ struct HTMLListView: View {
                     onOpen(file)
                     showFilePicker = false
                 })
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
             }
         }
     }

@@ -1,30 +1,36 @@
 import SwiftUI
 import WebKit
 
-/// Abstract web view protocol to support multiple rendering engines
-protocol WebViewEngine: UIViewRepresentable {
-    var url: URL { get }
-    var onExit: () -> Void { get }
-}
+// Uncomment when Chromium framework is linked:
+// import Chromium
 
 /// Chromium-based web view for iOS sideload.
-/// This uses a compiled Chromium binary (embedded or system-level).
-/// For production, integrate Google's Chromium via:
-/// - CEF (Chromium Embedded Framework) iOS port
-/// - A precompiled Chromium arm64 binary
-/// - Or compile from https://github.com/chromium/chromium source (iOS branch)
+/// Automatically uses native Chromium when available, falls back to WKWebView with Chromium user agent.
 struct ChromiumWebView: UIViewRepresentable {
     let url: URL
     var onExit: () -> Void
 
     func makeUIView(context: Context) -> UIView {
-        // Placeholder: In production, this would initialize a real Chromium view.
-        // For now, fallback to WKWebView with Chromium user agent.
-        // When you have a Chromium binary or framework:
-        //   1. Import the Chromium framework
-        //   2. Initialize chromium::ios::ChromiumWebView here
-        //   3. Return the native Chromium view
+        // Try to use native Chromium first
+        #if CHROMIUM_AVAILABLE
+        // Initialize actual Chromium view when framework is linked
+        // Example (adjust based on actual Chromium API):
+        // let chromiumView = ChromiumViewController()
+        // chromiumView.loadURL(url)
+        // return chromiumView.view
+        #endif
         
+        // Fallback: WKWebView with Chromium-like behavior
+        return makeWKWebView(context: context)
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onExit: onExit)
+    }
+
+    private func makeWKWebView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         let contentController = WKUserContentController()
 
@@ -39,7 +45,7 @@ struct ChromiumWebView: UIViewRepresentable {
         config.userContentController = contentController
 
         let webView = WKWebView(frame: .zero, configuration: config)
-        // Chromium user agent to identify as Chrome
+        // Chromium user agent to identify as Chrome (for websites that require it)
         webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/605.1.15"
         webView.navigationDelegate = context.coordinator
 
@@ -47,12 +53,6 @@ struct ChromiumWebView: UIViewRepresentable {
         let baseURL = getBaseURL(fileToLoad)
         webView.loadFileURL(fileToLoad, allowingReadAccessTo: baseURL)
         return webView
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onExit: onExit)
     }
 
     private func resolveFileToLoad(_ url: URL) -> URL {

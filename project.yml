@@ -13,6 +13,10 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.example.HTMLContainer
       INFOPLIST_FILE: Resources/Info.plist
+      FRAMEWORK_SEARCH_PATHS: $(PROJECT_DIR)/Frameworks
+      OTHER_LDFLAGS: -framework Chromium
+      # Uncomment when Chromium is integrated:
+      # SWIFT_DEFINES: CHROMIUM_AVAILABLE=1
     sources:
       - path: Sources/HTMLContainerApp
     resources:
