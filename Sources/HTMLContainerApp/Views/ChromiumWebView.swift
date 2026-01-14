@@ -14,6 +14,9 @@ struct ChromiumWebView: UIViewRepresentable {
         self.url = url
         self.onExit = onExit
         print("ChromiumWebView init for \(url.path)")
+        let logURL = url.deletingLastPathComponent().appendingPathComponent("webview_created.log")
+        let logContent = "WebView created for: \(url.path)\nTimestamp: \(Date())"
+        try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
     }
 
     func makeUIView(context: Context) -> UIView {

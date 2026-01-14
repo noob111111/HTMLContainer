@@ -68,6 +68,10 @@ struct HTMLListView: View {
     }
 
     private func handleFolderTap(_ folderURL: URL) {
+        let logURL = folderURL.appendingPathComponent("folder_tapped.log")
+        let logContent = "Folder tapped: \(folderURL.path)\nTimestamp: \(Date())"
+        try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
+        
         let fm = FileManager.default
         let all = (try? fm.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
         let htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
@@ -135,6 +139,10 @@ struct FilePickerSheet: View {
             let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
             htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
             print("FilePickerSheet loaded \(htmlFiles.count) HTML files from \(folder.path)")
+            
+            let logURL = folder.appendingPathComponent("sheet_opened.log")
+            let logContent = "Sheet opened for: \(folder.path)\nHTML files: \(htmlFiles.map { $0.lastPathComponent })\nTimestamp: \(Date())"
+            try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
             
             // Restore previously selected file if it exists
             if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {

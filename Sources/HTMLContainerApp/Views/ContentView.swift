@@ -14,6 +14,9 @@ struct ContentView: View {
             NavigationView {
                 HTMLListView(files: fileHelper.htmlFiles, onOpen: { url in
                     print("Opening HTML: \(url.path)")
+                    let logURL = url.deletingLastPathComponent().appendingPathComponent("html_opened.log")
+                    let logContent = "Opened HTML: \(url.path)\nTimestamp: \(Date())"
+                    try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
                     selectedURL = url
                     isPresenting = true
                 }, onRefresh: {
@@ -44,6 +47,11 @@ struct ContentView: View {
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
+        .onAppear {
+            let logURL = fileHelper.htmlsFolderURL.appendingPathComponent("app_started.log")
+            let logContent = "App started\nTimestamp: \(Date())"
+            try? logContent.write(to: logURL, atomically: true, encoding: .utf8)
+        }
         .sheet(isPresented: $showFolderPicker) {
             FolderPickerView { url in
                 isImporting = true
@@ -70,13 +78,11 @@ struct ContentView: View {
         } message: {
             Text(importError ?? "Unknown error")
         }
-        .fullScreenCover(isPresented: $isPresenting) {
+        .sheet(isPresented: $isPresenting) {
             if let url = selectedURL {
                 ChromiumWebView(url: url) {
                     isPresenting = false
                 }
-                .edgesIgnoringSafeArea(.all)
-                .statusBar(hidden: true)
             }
         }
         .onAppear {
