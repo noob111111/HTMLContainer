@@ -37,16 +37,18 @@ struct ChromiumWebView: UIViewRepresentable {
         // Inject a helper so games can call exitToSelector()
         let js = """
         window.exitToSelector = function() { window.webkit.messageHandlers.exit.postMessage(null); };
+        window.console.log = function(msg) { window.webkit.messageHandlers.console.postMessage(msg); };
         """
         let userScript = WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         contentController.addUserScript(userScript)
         contentController.add(context.coordinator, name: "exit")
+        contentController.add(context.coordinator, name: "console")
 
         config.userContentController = contentController
 
         let webView = WKWebView(frame: .zero, configuration: config)
         // Chromium user agent to identify as Chrome (for websites that require it)
-        webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/605.1.15"
+        // webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/605.1.15"
         webView.navigationDelegate = context.coordinator
 
         let fileToLoad = resolveFileToLoad(url)
@@ -82,6 +84,8 @@ struct ChromiumWebView: UIViewRepresentable {
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
             if message.name == "exit" {
                 DispatchQueue.main.async { self.onExit() }
+            } else if message.name == "console" {
+                print("WebView console: \(message.body)")
             }
         }
     }
