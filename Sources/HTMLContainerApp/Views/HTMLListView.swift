@@ -9,53 +9,54 @@ struct HTMLListView: View {
     @State private var showNoHTMLAlert = false
 
     var body: some View {
-        List {
-            ForEach(files, id: \.self) { url in
-                HStack {
-                    Image(systemName: isFolder(url) ? "folder.fill" : "doc.text.fill")
-                        .foregroundColor(.blue)
-                    Text(url.lastPathComponent)
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    if isFolder(url) {
-                        handleFolderTap(url)
-                    } else {
-                        onOpen(url)
-                    }
-                }
-                .contextMenu {
-                    Button("Open") {
-                        if isFolder(url) {
-                            handleFolderTap(url)
-                        } else {
-                            onOpen(url)
+        ZStack {
+            if let folder = selectedFolder {
+                FilePickerSheet(folder: folder, onSelect: { file in
+                    selectedFolder = nil
+                    onOpen(file)
+                })
+            } else {
+                List {
+                    ForEach(files, id: \.self) { url in
+                        HStack {
+                            Image(systemName: isFolder(url) ? "folder.fill" : "doc.text.fill")
+                                .foregroundColor(.blue)
+                            Text(url.lastPathComponent)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if isFolder(url) {
+                                handleFolderTap(url)
+                            } else {
+                                onOpen(url)
+                            }
+                        }
+                        .contextMenu {
+                            Button("Open") {
+                                if isFolder(url) {
+                                    handleFolderTap(url)
+                                } else {
+                                    onOpen(url)
+                                }
+                            }
+                            Button("Open in Folder") {
+                                let folderURL = isFolder(url) ? url : url.deletingLastPathComponent()
+                                UIApplication.shared.open(folderURL)
+                            }
+                            Button("Delete", role: .destructive) {
+                                try? FileManager.default.removeItem(at: url)
+                                onRefresh()
+                            }
                         }
                     }
-                    Button("Open in Folder") {
-                        let folderURL = isFolder(url) ? url : url.deletingLastPathComponent()
-                        UIApplication.shared.open(folderURL)
-                    }
-                    Button("Delete", role: .destructive) {
-                        try? FileManager.default.removeItem(at: url)
-                        onRefresh()
-                    }
+                }
+                .alert("No HTML Files Found", isPresented: $showNoHTMLAlert) {
+                    Button("OK") { showNoHTMLAlert = false }
+                } message: {
+                    Text("This folder doesn't contain any HTML files.")
                 }
             }
-        }
-        .background(
-            NavigationLink(destination: FilePickerSheet(folder: selectedFolder!, onSelect: { file in
-                selectedFolder = nil
-                onOpen(file)
-            }), isActive: Binding(get: { selectedFolder != nil }, set: { if !$0 { selectedFolder = nil } })) {
-                EmptyView()
-            }
-        )
-        .alert("No HTML Files Found", isPresented: $showNoHTMLAlert) {
-            Button("OK") { showNoHTMLAlert = false }
-        } message: {
-            Text("This folder doesn't contain any HTML files.")
         }
     }
 
