@@ -82,9 +82,6 @@ struct ContentView: View {
                 } message: {
                     Text(importError ?? "Unknown error")
                 }
-                .onAppear {
-                    fileHelper.prepareSampleIfNeeded()
-                }
             }
         }
     }

@@ -85,12 +85,6 @@ struct ChromiumWebView: UIViewRepresentable {
             print("Failed to write debug log: \(error)")
         }
         
-        // Temporary debug: wait 20 seconds, then exit
-        DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
-            print("Auto-exiting after 20s")
-            context.coordinator.onExit()
-        }
-        
         return webView
     }
 

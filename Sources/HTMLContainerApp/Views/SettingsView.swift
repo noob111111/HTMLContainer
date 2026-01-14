@@ -14,11 +14,6 @@ struct SettingsView: View {
                     }
                     .pickerStyle(.inline)
                 }
-
-                Section(header: Text("About")) {
-                    Text("HTMLContainer").font(.headline)
-                    Text("Uses WebKit on iOS to render imported HTML packages.")
-                }
             }
             .navigationTitle("Settings")
         }
