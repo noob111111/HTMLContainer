@@ -194,7 +194,6 @@ struct FilePickerSheet: View {
         }
         .padding()
     }
-    }
 }
 
 struct HTMLListView_Previews: PreviewProvider {
