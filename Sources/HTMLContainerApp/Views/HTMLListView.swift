@@ -124,6 +124,30 @@ struct FilePickerSheet: View {
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
+        Group {
+            if #available(iOS 16.0, *) {
+                mainContent
+            } else {
+                NavigationView {
+                    mainContent
+                }
+                .navigationViewStyle(.stack)
+            }
+        }
+        .onAppear {
+            let fm = FileManager.default
+            let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+            htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+            print("FilePickerSheet loaded \(htmlFiles.count) HTML files from \(folder.path)")
+            
+            // Restore previously selected file if it exists
+            if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {
+                selectedFile = htmlFiles.first { $0.lastPathComponent == savedName }
+            }
+        }
+    }
+
+    private var mainContent: some View {
         VStack(spacing: 20) {
             Text("Choose HTML File")
                 .font(.title2)
@@ -169,16 +193,7 @@ struct FilePickerSheet: View {
             }
         }
         .padding()
-        .onAppear {
-            let fm = FileManager.default
-            let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
-            htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
-            
-            // Restore previously selected file if it exists
-            if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {
-                selectedFile = htmlFiles.first { $0.lastPathComponent == savedName }
-            }
-        }
+    }
     }
 }
 

@@ -53,6 +53,7 @@ struct ChromiumWebView: UIViewRepresentable {
 
         let fileToLoad = resolveFileToLoad(url)
         let baseURL = getBaseURL(fileToLoad)
+        print("Loading file: \(fileToLoad), baseURL: \(baseURL)")
         webView.loadFileURL(fileToLoad, allowingReadAccessTo: baseURL)
         return webView
     }
