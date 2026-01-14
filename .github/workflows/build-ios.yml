@@ -18,10 +18,16 @@ jobs:
       - name: Run build script (verbose)
         run: scripts/build-ios.sh
 
-      - name: Upload artifacts (IPA and logs)
+      - name: Upload build log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: |
-            HTMLContainer.ipa
-            build.log
+          name: build-log
+          path: build.log
+
+      - name: Upload IPA
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: htmlcontainer-ipa
+          path: HTMLContainer.ipa

@@ -106,7 +106,6 @@ struct HTMLListView: View {
                 SettingsStore.markAsked(forFolderPath: key)
                 if !htmlFiles.isEmpty {
                     selectedFolder = folderURL
-                    showFilePicker = true
                 } else {
                     showNoHTMLAlert = true
                 }
@@ -114,7 +113,6 @@ struct HTMLListView: View {
         case .alwaysAsk:
             if !htmlFiles.isEmpty {
                 selectedFolder = folderURL
-                showFilePicker = true
             } else {
                 showNoHTMLAlert = true
             }
