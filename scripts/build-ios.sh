@@ -18,7 +18,12 @@ echo "xcodegen complete"
 
 set -x
 echo "Running xcodebuild..."
-xcodebuild -project HTMLContainer.xcodeproj -scheme HTMLContainer -configuration Release -sdk iphoneos BUILD_DIR=build CODE_SIGNING_ALLOWED=NO clean build
+if ! xcodebuild -project HTMLContainer.xcodeproj -scheme HTMLContainer -configuration Release -sdk iphoneos BUILD_DIR=build CODE_SIGNING_ALLOWED=NO clean build; then
+  echo "ERROR: xcodebuild failed. Check build.log for details."
+  echo "Build log contents:"
+  cat build.log || true
+  exit 1
+fi
 
 APP_PATH=$(find build/Release-iphoneos -maxdepth 1 -name "*.app" -print -quit || true)
 if [ -z "$APP_PATH" ]; then

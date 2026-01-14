@@ -169,13 +169,15 @@ struct FilePickerSheet: View {
             }
         }
         .padding()
-        let fm = FileManager.default
-        let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
-        htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
-        
-        // Restore previously selected file if it exists
-        if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {
-            selectedFile = htmlFiles.first { $0.lastPathComponent == savedName }
+        .onAppear {
+            let fm = FileManager.default
+            let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+            htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+            
+            // Restore previously selected file if it exists
+            if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {
+                selectedFile = htmlFiles.first { $0.lastPathComponent == savedName }
+            }
         }
     }
 }
