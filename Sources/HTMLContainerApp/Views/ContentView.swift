@@ -78,22 +78,26 @@ struct ContentView: View {
         } message: {
             Text(importError ?? "Unknown error")
         }
-        .sheet(isPresented: $isPresenting) {
-            if let url = selectedURL {
-                ChromiumWebView(url: url) {
-                    isPresenting = false
-                }
+        .background(
+            NavigationLink(destination: WebViewScreen(url: selectedURL!, onExit: { isPresenting = false }), isActive: $isPresenting) {
+                EmptyView()
             }
-        }
+        )
         .onAppear {
             fileHelper.prepareSampleIfNeeded()
         }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+struct WebViewScreen: View {
+    let url: URL
+    let onExit: () -> Void
+    
+    var body: some View {
+        ChromiumWebView(url: url, onExit: onExit)
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(url.lastPathComponent)
+            .navigationBarItems(trailing: Button("Close") { onExit() })
     }
 }
 

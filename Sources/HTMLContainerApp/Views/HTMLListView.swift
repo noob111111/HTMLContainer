@@ -6,7 +6,6 @@ struct HTMLListView: View {
     var onOpen: (URL) -> Void
     var onRefresh: () -> Void
     @State private var selectedFolder: URL?
-    @State private var showFilePicker = false
     @State private var showNoHTMLAlert = false
 
     var body: some View {
@@ -45,15 +44,14 @@ struct HTMLListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showFilePicker) {
-            if let folder = selectedFolder {
-                FilePickerSheet(folder: folder, onSelect: { file in
-                    onOpen(file)
-                    showFilePicker = false
-                })
-                .modifier(SheetModifier())
+        .background(
+            NavigationLink(destination: FilePickerSheet(folder: selectedFolder!, onSelect: { file in
+                selectedFolder = nil
+                onOpen(file)
+            }), isActive: Binding(get: { selectedFolder != nil }, set: { if !$0 { selectedFolder = nil } })) {
+                EmptyView()
             }
-        }
+        )
         .alert("No HTML Files Found", isPresented: $showNoHTMLAlert) {
             Button("OK") { showNoHTMLAlert = false }
         } message: {
