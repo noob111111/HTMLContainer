@@ -103,7 +103,7 @@ struct ContentView: View {
         }
         .fullScreenCover(isPresented: $isPresenting) {
             if let url = selectedURL {
-                HTMLWebView(url: url) {
+                ChromiumWebView(url: url) {
                     isPresenting = false
                 }
                 .edgesIgnoringSafeArea(.all)

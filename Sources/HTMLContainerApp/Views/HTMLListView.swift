@@ -3,6 +3,8 @@ import SwiftUI
 struct HTMLListView: View {
     var files: [URL]
     var onOpen: (URL) -> Void
+    @State private var selectedFolder: URL?
+    @State private var showFilePicker = false
 
     var body: some View {
         List {
@@ -15,14 +17,34 @@ struct HTMLListView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture {
-                    onOpen(url)
+                    if isFolder(url) {
+                        selectedFolder = url
+                        showFilePicker = true
+                    } else {
+                        onOpen(url)
+                    }
                 }
                 .contextMenu {
-                    Button("Open") { onOpen(url) }
+                    Button("Open") {
+                        if isFolder(url) {
+                            selectedFolder = url
+                            showFilePicker = true
+                        } else {
+                            onOpen(url)
+                        }
+                    }
                     Button("Delete", role: .destructive) {
                         try? FileManager.default.removeItem(at: url)
                     }
                 }
+            }
+        }
+        .sheet(isPresented: $showFilePicker) {
+            if let folder = selectedFolder {
+                FilePickerSheet(folder: folder, onSelect: { file in
+                    onOpen(file)
+                    showFilePicker = false
+                })
             }
         }
     }
@@ -31,6 +53,70 @@ struct HTMLListView: View {
         var isDir: ObjCBool = false
         FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
         return isDir.boolValue
+    }
+}
+
+// Sheet to pick an HTML file from a folder
+struct FilePickerSheet: View {
+    let folder: URL
+    var onSelect: (URL) -> Void
+    @State private var htmlFiles: [URL] = []
+    @State private var selectedFile: URL?
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                if htmlFiles.isEmpty {
+                    Text("No HTML files found in this folder")
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    List {
+                        ForEach(htmlFiles, id: \.self) { file in
+                            Button(action: {
+                                SettingsStore.setPreferredFile(file.lastPathComponent, forFolder: folder.path)
+                                onSelect(file)
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.text.fill")
+                                        .foregroundColor(.blue)
+                                    VStack(alignment: .leading) {
+                                        Text(file.lastPathComponent)
+                                            .foregroundColor(.primary)
+                                        if selectedFile == file {
+                                            Text("(Previously selected)")
+                                                .font(.caption)
+                                                .foregroundColor(.green)
+                                        }
+                                    }
+                                    Spacer()
+                                    if selectedFile == file {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Choose HTML File")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .onAppear {
+            loadHTMLFiles()
+        }
+    }
+
+    private func loadHTMLFiles() {
+        let fm = FileManager.default
+        let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        htmlFiles = all.filter { $0.pathExtension.lowercased() == "html" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+        
+        // Restore previously selected file if it exists
+        if let savedName = SettingsStore.preferredFile(forFolder: folder.path) {
+            selectedFile = htmlFiles.first { $0.lastPathComponent == savedName }
+        }
     }
 }
 

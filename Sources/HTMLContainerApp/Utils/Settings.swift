@@ -18,6 +18,7 @@ enum AutoOpenSetting: Int, CaseIterable, Identifiable {
 
 struct SettingsStore {
     private static let askedKey = "askedFolders"
+    private static let filePrefsKey = "filePreferences"
 
     static func hasAsked(forFolderPath path: String) -> Bool {
         let set = UserDefaults.standard.stringArray(forKey: askedKey) ?? []
@@ -30,5 +31,18 @@ struct SettingsStore {
             set.append(path)
             UserDefaults.standard.set(set, forKey: askedKey)
         }
+    }
+
+    // Save preferred HTML file for a folder
+    static func setPreferredFile(_ filePath: String, forFolder folderPath: String) {
+        var prefs = UserDefaults.standard.dictionary(forKey: filePrefsKey) as? [String: String] ?? [:]
+        prefs[folderPath] = filePath
+        UserDefaults.standard.set(prefs, forKey: filePrefsKey)
+    }
+
+    // Get preferred HTML file for a folder (returns nil if not set)
+    static func preferredFile(forFolder folderPath: String) -> String? {
+        let prefs = UserDefaults.standard.dictionary(forKey: filePrefsKey) as? [String: String] ?? [:]
+        return prefs[folderPath]
     }
 }
