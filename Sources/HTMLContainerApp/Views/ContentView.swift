@@ -13,6 +13,7 @@ struct ContentView: View {
         TabView {
             NavigationView {
                 HTMLListView(files: fileHelper.htmlFiles, onOpen: { url in
+                    print("Opening HTML: \(url.path)")
                     selectedURL = url
                     isPresenting = true
                 }, onRefresh: {

@@ -129,16 +129,7 @@ struct FilePickerSheet: View {
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
-        Group {
-            if #available(iOS 16.0, *) {
-                mainContent
-            } else {
-                NavigationView {
-                    mainContent
-                }
-                .navigationViewStyle(.stack)
-            }
-        }
+        mainContent
         .onAppear {
             let fm = FileManager.default
             let all = (try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []

@@ -10,6 +10,12 @@ struct ChromiumWebView: UIViewRepresentable {
     let url: URL
     var onExit: () -> Void
 
+    init(url: URL, onExit: @escaping () -> Void) {
+        self.url = url
+        self.onExit = onExit
+        print("ChromiumWebView init for \(url.path)")
+    }
+
     func makeUIView(context: Context) -> UIView {
         // Try to use native Chromium first
         #if CHROMIUM_AVAILABLE
@@ -54,23 +60,31 @@ struct ChromiumWebView: UIViewRepresentable {
         let fileToLoad = resolveFileToLoad(url)
         let baseURL = getBaseURL(fileToLoad)
         print("Loading file: \(fileToLoad), baseURL: \(baseURL)")
+        
+        let fileExists = FileManager.default.fileExists(atPath: fileToLoad.path)
+        print("File exists: \(fileExists)")
+        
         webView.loadFileURL(fileToLoad, allowingReadAccessTo: baseURL)
         
-        // Temporary debug: wait 20 seconds, write log, then exit
+        // Write debug log immediately
+        let logURL = url.deletingLastPathComponent().appendingPathComponent("debug.log")
+        let logContent = """
+        Loaded file: \(url.path)
+        Resolved file: \(fileToLoad.path)
+        Base URL: \(baseURL.path)
+        File exists: \(fileExists)
+        Timestamp: \(Date())
+        """
+        do {
+            try logContent.write(to: logURL, atomically: true, encoding: .utf8)
+            print("Wrote debug log to: \(logURL.path)")
+        } catch {
+            print("Failed to write debug log: \(error)")
+        }
+        
+        // Temporary debug: wait 20 seconds, then exit
         DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
-            let logURL = url.deletingLastPathComponent().appendingPathComponent("debug.log")
-            let logContent = """
-            Loaded file: \(url.path)
-            Resolved file: \(fileToLoad.path)
-            Base URL: \(baseURL.path)
-            Timestamp: \(Date())
-            """
-            do {
-                try logContent.write(to: logURL, atomically: true, encoding: .utf8)
-                print("Wrote debug log to: \(logURL.path)")
-            } catch {
-                print("Failed to write debug log: \(error)")
-            }
+            print("Auto-exiting after 20s")
             context.coordinator.onExit()
         }
         
@@ -107,6 +121,18 @@ struct ChromiumWebView: UIViewRepresentable {
             } else if message.name == "console" {
                 print("WebView console: \(message.body)")
             }
+        }
+        
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            print("WebView didFinish loading")
+        }
+        
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            print("WebView didFail: \(error)")
+        }
+        
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            print("WebView didFailProvisional: \(error)")
         }
     }
 }
