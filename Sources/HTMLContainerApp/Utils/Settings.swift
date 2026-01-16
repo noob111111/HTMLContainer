@@ -18,15 +18,17 @@ enum AutoOpenSetting: Int, CaseIterable, Identifiable {
 }
 
 enum CloseButtonPosition: Int, CaseIterable, Identifiable {
-    case topLeft = 0
-    case topRight = 1
-    case bottomLeft = 2
-    case bottomRight = 3
+    case disabled = 0
+    case topLeft = 1
+    case topRight = 2
+    case bottomLeft = 3
+    case bottomRight = 4
 
     var id: Int { rawValue }
 
     var description: String {
         switch self {
+        case .disabled: return "Disabled"
         case .topLeft: return "Top Left"
         case .topRight: return "Top Right"
         case .bottomLeft: return "Bottom Left"
@@ -34,8 +36,9 @@ enum CloseButtonPosition: Int, CaseIterable, Identifiable {
         }
     }
 
-    var alignment: Alignment {
+    var alignment: Alignment? {
         switch self {
+        case .disabled: return nil
         case .topLeft: return .topLeading
         case .topRight: return .topTrailing
         case .bottomLeft: return .bottomLeading

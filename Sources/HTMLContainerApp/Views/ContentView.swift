@@ -103,13 +103,15 @@ struct WebViewScreen: View {
 
     var body: some View {
         let position = CloseButtonPosition(rawValue: closeButtonPositionRaw) ?? .topRight
-        ZStack(alignment: position.alignment) {
+        ZStack(alignment: position.alignment ?? .topTrailing) {
             HTMLWebView(url: url, onExit: onExit)
-            Button(action: onExit) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title)
-                    .foregroundColor(.gray)
-                    .padding()
+            if position != .disabled {
+                Button(action: onExit) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.gray)
+                        .padding()
+                }
             }
         }
     }
