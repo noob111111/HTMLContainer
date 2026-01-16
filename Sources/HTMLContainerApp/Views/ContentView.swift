@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var importError: String?
     @State private var showError = false
     @State private var isImporting = false
+    @Binding var pendingURL: URL?
 
     var body: some View {
         ZStack {
@@ -82,6 +83,13 @@ struct ContentView: View {
                     Button("OK") { showError = false }
                 } message: {
                     Text(importError ?? "Unknown error")
+                }
+                .onChange(of: pendingURL) { newURL in
+                    if let url = newURL {
+                        selectedURL = url
+                        isPresenting = true
+                        pendingURL = nil
+                    }
                 }
             }
         }
