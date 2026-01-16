@@ -43,11 +43,14 @@ This allows you to launch the app directly from the **Shortcuts** app.
    ```
    htmlcontainer://
    ```
-5. Save the shortcut
+   or
+   ```
+   htmlcontainer://folder/file.html
+   ```
+6. Save the shortcut
 
 After this, activating the shortcut, will launch HTMLContainer directly.
 
 ## Notes
-
 * GitHub Actions builds are **unsigned**
 * The project is under active development
