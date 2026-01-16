@@ -96,7 +96,7 @@ struct WebViewScreen: View {
     var body: some View {
         let position = CloseButtonPosition(rawValue: closeButtonPositionRaw) ?? .topRight
         ZStack(alignment: position.alignment) {
-            ChromiumWebView(url: url, onExit: onExit)
+            HTMLWebView(url: url, onExit: onExit)
             Button(action: onExit) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.title)
