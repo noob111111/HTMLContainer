@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>com.kookhtime.htmlopener.files</string>
+<key>CFBundleName</key><string>HTML Opener</string>
+<key>CFBundleDisplayName</key><string>HTML Opener</string>
+<key>CFBundleExecutable</key><string>HTMLOpener</string>
+<key>CFBundleIconFiles</key><array><string>AppIcon60x60@2x.png</string><string>AppIcon76x76@2x.png</string></array>
+<key>CFBundleIcons</key><dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>AppIcon60x60</string></array></dict></dict>
+<key>CFBundleIcons~ipad</key><dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>AppIcon60x60</string><string>AppIcon76x76</string></array></dict></dict>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>1.0</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+<key>MinimumOSVersion</key><string>15.0</string>
+<key>UIDeviceFamily</key><array><integer>1</integer><integer>2</integer></array>
+<key>UIRequiredDeviceCapabilities</key><array><string>arm64</string></array>
+<key>LSRequiresIPhoneOS</key><true/>
+<key>UIUserInterfaceStyle</key><string>Dark</string>
+<key>UIStatusBarHidden</key><true/>
+<key>UIViewControllerBasedStatusBarAppearance</key><true/>
+<key>UIRequiresFullScreen</key><true/>
+<key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string><string>UIInterfaceOrientationPortraitUpsideDown</string></array>
+<key>UISupportedInterfaceOrientations~ipad</key><array><string>UIInterfaceOrientationPortrait</string><string>UIInterfaceOrientationPortraitUpsideDown</string><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string></array>
+<key>UIApplicationSceneManifest</key><dict><key>UIApplicationSupportsMultipleScenes</key><false/>
+<key>UISceneConfigurations</key><dict><key>UIWindowSceneSessionRoleApplication</key><array><dict><key>UISceneConfigurationName</key><string>Default</string><key>UISceneDelegateClassName</key><string>SceneDelegate</string></dict></array></dict></dict>
+<key>UILaunchScreen</key><dict/>
+<key>UIFileSharingEnabled</key><true/>
+<key>LSSupportsOpeningDocumentsInPlace</key><true/>
+<key>CFBundleURLTypes</key><array><dict><key>CFBundleURLName</key><string>htmlopener</string><key>CFBundleURLSchemes</key><array><string>htmlopener</string></array></dict></array>
+<key>CFBundleDocumentTypes</key><array><dict>
+<key>CFBundleTypeName</key><string>HTML Document</string><key>CFBundleTypeRole</key><string>Viewer</string><key>LSHandlerRank</key><string>Owner</string>
+<key>LSItemContentTypes</key><array><string>public.html</string><string>public.xhtml</string></array><key>CFBundleTypeExtensions</key><array><string>html</string><string>htm</string><string>xhtml</string></array></dict></array>
+<key>UTImportedTypeDeclarations</key><array/>
+<key>UIApplicationShortcutItems</key><array>
+<dict><key>UIApplicationShortcutItemType</key><string>open</string><key>UIApplicationShortcutItemTitle</key><string>Show list</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeSearch</string></dict>
+<dict><key>UIApplicationShortcutItemType</key><string>restart</string><key>UIApplicationShortcutItemTitle</key><string>Restart current page</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeUpdate</string></dict></array>
+<key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><true/></dict>
+<key>NSCameraUsageDescription</key><string>Used by pages you open.</string>
+<key>NSMicrophoneUsageDescription</key><string>Used by pages you open.</string>
+<key>NSLocationWhenInUseUsageDescription</key><string>Used by pages you open.</string>
+</dict></plist>
