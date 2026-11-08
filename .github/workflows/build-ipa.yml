@@ -1,0 +1,84 @@
+name: Build IPA
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HOW RELEASES AND THE CHANGELOG WORK
+#
+#  * Every push / pull request / manual run builds the IPA and attaches it to
+#    the run (Actions tab → the run → "Artifacts"). No release is created.
+#
+#  * To publish a GitHub Release, push a TAG that starts with "v", e.g. v1.0:
+#        git tag v1.0 && git push origin v1.0
+#    (or create a release/tag from the GitHub website).
+#    The release is then created automatically with the IPA attached.
+#
+#  * The release's TITLE and BODY come from the file  CHANGELOG.md  in the
+#    root of the repo (next to README.md):
+#        - 1st line  = the release TITLE   (a leading "# " is removed if present)
+#        - everything after the 1st line = the release BODY (Markdown is fine)
+#
+#    Example CHANGELOG.md:
+#        Autosave and shortcuts
+#
+#        ## New
+#        - Autosave every 5 minutes
+#        - Home Screen shortcuts
+#
+#        ## Fixed
+#        - Black screen on some pages
+#
+#  * Edit CHANGELOG.md BEFORE you create the tag. The workflow reads the file as
+#    it is at the tagged commit.
+#  * If CHANGELOG.md is empty, the release title falls back to the tag name.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:        # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write           # needed to create releases
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ldid
+        run: brew install ldid
+
+      - name: Build HTMLOpener.ipa
+        run: bash scripts/build.sh
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HTMLOpener-ipa
+          path: build/HTMLOpener.ipa
+          if-no-files-found: error
+
+      # Only for tags like v1.0: split CHANGELOG.md into a title and a body.
+      - name: Read CHANGELOG.md
+        id: changelog
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::CHANGELOG.md not found in the repo root"; exit 1
+          fi
+          # 1st line -> title (strip leading '#' characters and spaces)
+          TITLE=$(head -n 1 CHANGELOG.md | sed -E 's/^#+[[:space:]]*//; s/[[:space:]]+$//')
+          # everything after the 1st line -> body
+          tail -n +2 CHANGELOG.md > build/release-notes.md
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+
+      # Only for tags like v1.0: create the release with title, body and the IPA.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.changelog.outputs.title || github.ref_name }}
+          body_path: build/release-notes.md
+          files: build/HTMLOpener.ipa
